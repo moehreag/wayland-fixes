@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "io.github.moehreag.wayland_fixes.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"client": [
+		"MixinGameRendererDrawVirtualCursor",
+		"MixinMinecraftSetup",
+		"MixinMouse",
+		"MixinWindow"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

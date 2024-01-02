@@ -1,0 +1,124 @@
+import groovy.json.JsonSlurper
+
+plugins {
+    id 'fabric-loom' version "1.4.+"
+    id 'io.freefair.lombok' version "8.1.0"
+    id 'maven-publish'
+    id 'com.modrinth.minotaur' version "2.+"
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+base.archivesName = project.archives_base_name
+version = project.mod_version
+group = project.maven_group
+
+repositories {
+    mavenCentral()
+}
+
+loom {
+    mods {
+        "wayland-fixes" {
+            sourceSet("main")
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.mappings}"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+// ensure that the encoding is set to UTF-8, no matter what the system default is
+// this fixes some edge cases with special characters not displaying correctly
+// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = "UTF-8"
+    if (JavaVersion.current().isJava9Compatible()) it.options.release = 8
+}
+
+java {
+    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+    // if it is present.
+    // If you remove this line, sources will not be generated.
+    withSourcesJar()
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+}
+
+// configure the maven publication
+publishing {
+    publications {
+        mavenJava(MavenPublication) { publication ->
+            from components.java
+        }
+    }
+
+    // select the repositories you want to publish to
+    repositories {
+        maven {
+            name = "owlMaven"
+            def repository = project.version.toString().contains("beta") || project.version.toString().contains("alpha") ? "snapshots" : "releases"
+            url = "https://moehreag.duckdns.org/maven/" + repository
+            credentials(PasswordCredentials)
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+}
+
+tasks.modrinth.dependsOn publish
+
+static def fetchGameVersions(){
+    List<String> versions = new ArrayList<>()
+    InputStream stream = URI.create("https://meta.quiltmc.org/v3/versions/game").toURL().openStream()
+    JsonSlurper slurper = new JsonSlurper()
+    List<Version> json = slurper.parse(stream) as List<Version>
+    json.forEach(ve -> {
+        if (ve.stable) {
+            def v = ve.version
+            String[] parts = v.split("\\.");
+            int minor = Integer.parseInt(parts[1])
+            int patch = parts.length > 2 ? Integer.parseInt(parts[2]) : 0
+            if (minor > 20 || (minor == 20 && patch >= 2)) {
+                versions.add(v)
+            }
+        }
+    })
+    return versions
+}
+
+class Version {
+    String version
+    boolean stable
+}
+
+modrinth {
+    token = System.getenv("MODRINTH_TOKEN")
+    projectId = "fylxngrk"
+    versionType = "release"
+    uploadFile = remapJar
+    additionalFiles = [remapSourcesJar]
+    gameVersions = fetchGameVersions()
+    loaders = ["fabric", "quilt"]
+    dependencies {
+        optional.project "fabric-api"
+        optional.project "qsl"
+    }
+}
