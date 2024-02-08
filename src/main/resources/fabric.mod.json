@@ -3,7 +3,7 @@
   "id": "wayland-fixes",
   "version": "${version}",
   "name": "Wayland Fixes",
-  "description": "A whacky mod to fix wayland bugs. You can now run minecraft on wayland natively without needing to ",
+  "description": "A whacky mod to fix wayland bugs. You can now run minecraft on wayland natively without the need to leave anything behind.",
   "authors": [
     "moehreag"
   ],
@@ -23,6 +23,9 @@
   ],
   "depends": {
     "fabricloader": ">=0.12.0",
-    "minecraft": ">=1.20.2"
+    "minecraft": ">=1.13"
+  },
+  "recommends": {
+    "quilt_loader": "*"
   }
 }

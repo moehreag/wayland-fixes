@@ -31,7 +31,7 @@ public class DesktopFileInjector {
 
 			String version = FabricLoader.getInstance().getModContainer("minecraft").orElseThrow(IllegalStateException::new)
 					.getMetadata().getVersion().getFriendlyString();
-			injectFile(location, String.format(IOUtils.toString(Objects.requireNonNull(stream)),
+			injectFile(location, String.format(IOUtils.toString(Objects.requireNonNull(stream), StandardCharsets.UTF_8),
 					version, ICON_NAME.substring(0, ICON_NAME.lastIndexOf("."))).getBytes(StandardCharsets.UTF_8));
 		} catch (IOException e) {
 			WaylandFixes.LOGGER.error("Failed to inject icon: ", e);

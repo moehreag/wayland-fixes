@@ -19,8 +19,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinWindow {
 
 	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwDefaultWindowHints()V", shift = At.Shift.AFTER, remap = false))
-	private void onWindowHints(WindowEventHandler windowEventHandler, MonitorTracker monitorTracker, WindowSettings windowSettings, String string, String string2, CallbackInfo ci){
-		if (GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND){
+	private void onWindowHints(WindowEventHandler windowEventHandler, MonitorTracker monitorTracker, WindowSettings windowSettings, String string, String string2, CallbackInfo ci) {
+		if (GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND) {
 			GLFW.glfwWindowHint(GLFW.GLFW_FOCUS_ON_SHOW, GLFW.GLFW_FALSE); // disable an unsupported function on wayland
 			DesktopFileInjector.inject();
 			GLFW.glfwWindowHintString(GLFW.GLFW_WAYLAND_APP_ID, DesktopFileInjector.APP_ID);
@@ -28,8 +28,8 @@ public class MixinWindow {
 	}
 
 	@Inject(method = "setIcon", at = @At("HEAD"), cancellable = true)
-	private void injectIcon(ResourcePack resourcePack, Icons icons, CallbackInfo ci){
-		if (GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND){
+	private void injectIcon(ResourcePack resourcePack, Icons icons, CallbackInfo ci) {
+		if (GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND) {
 			try {
 				DesktopFileInjector.setIcon(icons.getIcons(resourcePack));
 				ci.cancel();

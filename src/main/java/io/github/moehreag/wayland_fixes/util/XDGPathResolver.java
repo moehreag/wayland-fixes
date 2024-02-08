@@ -13,7 +13,7 @@ import org.apache.commons.io.IOUtils;
 public class XDGPathResolver {
 
 	private static Path getHome(){
-		String home = System.getenv().getOrDefault("$HOME", System.getProperty("user.home"));
+		String home = System.getenv().getOrDefault("HOME", System.getProperty("user.home"));
 		if (home == null || home.isEmpty()) {
 			throw new IllegalStateException("could not resolve user home");
 		}
@@ -21,7 +21,7 @@ public class XDGPathResolver {
 	}
 
 	public static Path getUserDataLocation() {
-		String xdgDataHome = System.getenv("$XDG_DATA_HOME");
+		String xdgDataHome = System.getenv("XDG_DATA_HOME");
 		if (xdgDataHome == null || xdgDataHome.isEmpty()) {
 			return getHome().resolve(".local/share/");
 		}
@@ -44,7 +44,7 @@ public class XDGPathResolver {
 
 		try {
 			Process p = builder.start();
-			themeName = IOUtils.toString(p.getInputStream()).split("'")[1];
+			themeName = IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8).split("'")[1];
 			p.waitFor();
 		} catch (IOException | InterruptedException e) {
 			themeName = "default";
@@ -106,7 +106,7 @@ public class XDGPathResolver {
 
 		try {
 			Process p = builder.start();
-			size = Integer.parseInt(IOUtils.toString(p.getInputStream()).split("\n")[0]);
+			size = Integer.parseInt(IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8).split("\n")[0]);
 			p.waitFor();
 		} catch (IOException | InterruptedException e) {
 			size = 24;
